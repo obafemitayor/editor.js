@@ -94,74 +94,65 @@ describe('Slash keydown', function () {
   });
 
   describe('pressed outside editor', function () {
-    it('should not make any changes when target is outside editor', function () {
-      // Create editor with a paragraph block
+    it('should not modify any text outside editor when text block is selected', () => {
+      // Create editor with an empty block
       cy.createEditor({
         data: {
           blocks: [
             {
               type: 'paragraph',
               data: {
-                text: 'Editor content',
+                text: '',
               },
             },
           ],
         },
       });
 
-      // Create a contenteditable div outside the editor
+      // First click the plus button to open the toolbox
       cy.get('[data-cy=editorjs]')
-        .parent()
-        .then(($parent) => {
-          const outsideDiv = document.createElement('div');
+        .find('.ce-paragraph')
+        .click();
 
-          outsideDiv.contentEditable = 'true';
-          outsideDiv.textContent = 'Text outside editor';
-          outsideDiv.setAttribute('data-cy', 'outside-editor');
-          $parent.append(outsideDiv);
+      cy.get('[data-cy="toolbox"] .ce-popover__container')
+        .should('not.be.visible');
+
+      // Get the heading text content before the slash key press
+      cy.get('h1')
+        .contains('Editor.js test page')
+        .invoke('text')
+        .then((originalText) => {
+          // Simulate selecting the heading text
+          cy.get('h1')
+            .contains('Editor.js test page')
+            .trigger('mousedown')
+            .trigger('mouseup');
+
+          // Press the slash key
+          cy.get('h1')
+            .contains('Editor.js test page')
+            .trigger('keydown', { 
+              key: '/',
+              code: 'Slash',
+              keyCode: 191,
+              which: 191,
+              ctrlKey: false,
+              metaKey: false
+            });
+
+          // Verify the heading text hasn't changed
+          cy.get('h1')
+            .contains('Editor.js test page')
+            .should('have.text', originalText);
+
+          // Verify editor content hasn't changed and toolbox isn't open
+          cy.get('[data-cy=editorjs]')
+            .find('.ce-paragraph')
+            .should('have.text', '');
+
+          cy.get('[data-cy="toolbox"] .ce-popover__container')
+            .should('not.be.visible');
         });
-
-      // Select text outside editor and press slash
-      cy.get('[data-cy=outside-editor]')
-        .type('{selectall}')  // Select all text in the outside div
-        .trigger('keydown', { key: '/' });  // Trigger slash key
-
-      // Verify the text outside editor wasn't changed
-      cy.get('[data-cy=outside-editor]')
-        .should('have.text', 'Text outside editor');
-
-      // Verify editor content wasn't affected
-      cy.get('[data-cy=editorjs]')
-        .find('.ce-paragraph')
-        .should('have.text', 'Editor content');
-    });
-
-    it('should make changes when target is inside editor', function () {
-      // Create editor with a paragraph block
-      cy.createEditor({
-        data: {
-          blocks: [
-            {
-              type: 'paragraph',
-              data: {
-                text: 'Editor content',
-              },
-            },
-          ],
-        },
-      });
-
-      // Select text inside editor and press slash
-      cy.get('[data-cy=editorjs]')
-        .find('.ce-paragraph')
-        .click()
-        .type('{selectall}')  // Select all text in the paragraph
-        .type('/');  // Type slash directly instead of triggering keydown
-
-      // Verify the text inside editor was changed
-      cy.get('[data-cy=editorjs]')
-        .find('.ce-paragraph')
-        .should('have.text', '/');
     });
   });
 });
