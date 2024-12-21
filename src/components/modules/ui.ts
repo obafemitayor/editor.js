@@ -477,6 +477,12 @@ export default class UI extends Module<UINodes> {
    * @param {KeyboardEvent} event - keyboard event
    */
   private documentKeydown(event: KeyboardEvent): void {
+    const wasEventTriggeredInsideEditor = this.nodes.wrapper.contains(event.target as Node);
+
+    if (!wasEventTriggeredInsideEditor && !this.someToolbarOpened) {
+      return;
+    }
+
     switch (event.keyCode) {
       case _.keyCodes.ENTER:
         this.enterPressed(event);
