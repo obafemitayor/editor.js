@@ -237,12 +237,13 @@ export default class BlockEvents extends Module {
    * @param event - keydown
    */
   private slashPressed(event: KeyboardEvent): void {
-    const currentBlock = this.Editor.BlockManager.currentBlock;
     const wasEventTriggeredInsideEditor = this.Editor.UI.nodes.wrapper.contains(event.target as Node);
 
-    if (!wasEventTriggeredInsideEditor || !currentBlock) {
+    if (!wasEventTriggeredInsideEditor) {
       return;
     }
+
+    const currentBlock = this.Editor.BlockManager.currentBlock;
 
     const canOpenToolbox = currentBlock.isEmpty;
 
