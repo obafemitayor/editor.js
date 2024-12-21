@@ -92,6 +92,78 @@ describe('Slash keydown', function () {
         .should('eq', 'Hello/');
     });
   });
+
+  describe('pressed outside editor', function () {
+    it('should not make any changes when target is outside editor', function () {
+      // Create editor with a paragraph block
+      cy.createEditor({
+        data: {
+          blocks: [
+            {
+              type: 'paragraph',
+              data: {
+                text: 'Editor content',
+              },
+            },
+          ],
+        },
+      });
+
+      // Create a contenteditable div outside the editor
+      cy.get('[data-cy=editorjs]')
+        .parent()
+        .then(($parent) => {
+          const outsideDiv = document.createElement('div');
+
+          outsideDiv.contentEditable = 'true';
+          outsideDiv.textContent = 'Text outside editor';
+          outsideDiv.setAttribute('data-cy', 'outside-editor');
+          $parent.append(outsideDiv);
+        });
+
+      // Select text outside editor and press slash
+      cy.get('[data-cy=outside-editor]')
+        .type('{selectall}')  // Select all text in the outside div
+        .trigger('keydown', { key: '/' });  // Trigger slash key
+
+      // Verify the text outside editor wasn't changed
+      cy.get('[data-cy=outside-editor]')
+        .should('have.text', 'Text outside editor');
+
+      // Verify editor content wasn't affected
+      cy.get('[data-cy=editorjs]')
+        .find('.ce-paragraph')
+        .should('have.text', 'Editor content');
+    });
+
+    it('should make changes when target is inside editor', function () {
+      // Create editor with a paragraph block
+      cy.createEditor({
+        data: {
+          blocks: [
+            {
+              type: 'paragraph',
+              data: {
+                text: 'Editor content',
+              },
+            },
+          ],
+        },
+      });
+
+      // Select text inside editor and press slash
+      cy.get('[data-cy=editorjs]')
+        .find('.ce-paragraph')
+        .click()
+        .type('{selectall}')  // Select all text in the paragraph
+        .type('/');  // Type slash directly instead of triggering keydown
+
+      // Verify the text inside editor was changed
+      cy.get('[data-cy=editorjs]')
+        .find('.ce-paragraph')
+        .should('have.text', '/');
+    });
+  });
 });
 
 describe('CMD+Slash keydown', function () {
