@@ -1,9 +1,5 @@
 # Changelog
 
-### 2.31.1
-
-- `Fix` - Fix the memory leak issue in `Shortcuts` class
-
 ### 2.31.0
 
 - `New` - Inline tools (those with `isReadOnlySupported` specified) can now be used in read-only mode
@@ -15,6 +11,7 @@
 - `Improvement` - The current block reference will be updated in read-only mode when blocks are clicked
 - `Fix` - codex-notifier and codex-tooltip moved from devDependencies to dependencies in package.json to solve type errors
 - `Fix` - Handle whitespace input in empty placeholder elements to prevent caret from moving unexpectedly to the end of the placeholder
+- `Fix` - Fix the memory leak issue in `Shortcuts` class
 
 ### 2.30.7
 
