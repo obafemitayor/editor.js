@@ -244,7 +244,6 @@ export default class BlockEvents extends Module {
     }
 
     const currentBlock = this.Editor.BlockManager.currentBlock;
-
     const canOpenToolbox = currentBlock.isEmpty;
 
     /**
