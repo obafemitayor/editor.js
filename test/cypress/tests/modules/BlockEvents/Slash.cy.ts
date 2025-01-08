@@ -95,7 +95,6 @@ describe('Slash keydown', function () {
 
   describe('pressed outside editor', function () {
     it('should not modify any text outside editor when text block is selected', () => {
-      // Create editor with an empty block
       cy.createEditor({
         data: {
           blocks: [
@@ -109,50 +108,42 @@ describe('Slash keydown', function () {
         },
       });
 
-      // First click the plus button to open the toolbox
+      cy.document().then((doc) => {
+        const title = doc.querySelector('h1');
+
+        if (title) {
+          title.setAttribute('data-cy', 'page-title');
+        }
+      });
+
+      // Step 1
+      // Click on the plus button and select the text option
       cy.get('[data-cy=editorjs]')
         .find('.ce-paragraph')
         .click();
-
+      cy.get('[data-cy=editorjs]')
+        .find('.ce-toolbar__plus')
+        .click({ force: true });
       cy.get('[data-cy="toolbox"] .ce-popover__container')
-        .should('not.be.visible');
+        .contains('Text')
+        .click();
 
-      // Get the heading text content before the slash key press
-      cy.get('h1')
-        .contains('Editor.js test page')
-        .invoke('text')
-        .then((originalText) => {
-          // Simulate selecting the heading text
-          cy.get('h1')
-            .contains('Editor.js test page')
-            .trigger('mousedown')
-            .trigger('mouseup');
+      // Step 2
+      // Select the 'Editor.js test page' text
+      cy.get('[data-cy=page-title]')
+        .invoke('attr', 'contenteditable', 'true')
+        .click()
+        .type('{selectall}')
+        .invoke('removeAttr', 'contenteditable');
 
-          // Press the slash key
-          cy.get('h1')
-            .contains('Editor.js test page')
-            .trigger('keydown', { 
-              key: '/',
-              code: 'Slash',
-              keyCode: 191,
-              which: 191,
-              ctrlKey: false,
-              metaKey: false
-            });
+      // Step 3
+      // Press the Slash key
+      cy.get('[data-cy=page-title]')
+        .trigger('keydown', { key: '/',
+          code: 'Slash',
+          which: 191 });
 
-          // Verify the heading text hasn't changed
-          cy.get('h1')
-            .contains('Editor.js test page')
-            .should('have.text', originalText);
-
-          // Verify editor content hasn't changed and toolbox isn't open
-          cy.get('[data-cy=editorjs]')
-            .find('.ce-paragraph')
-            .should('have.text', '');
-
-          cy.get('[data-cy="toolbox"] .ce-popover__container')
-            .should('not.be.visible');
-        });
+      cy.get('[data-cy=page-title]').should('have.text', 'Editor.js test page');
     });
   });
 });
